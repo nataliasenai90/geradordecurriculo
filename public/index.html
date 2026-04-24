@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Currículo</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1>Gerador de Currículo em PDF</h1>
+            <p>Preencha os dados abaixo e crie seu currículo profissional rapidamente.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <form id="curriculo-form" novalidate>
+            <!-- Opções Extras -->
+            <section class="card options-section">
+                <div class="form-group">
+                    <label for="template">Estilo de Template</label>
+                    <select id="template" name="template">
+                        <option value="moderno">Moderno (Sem Sans-serif)</option>
+                        <option value="classico">Clássico (Com Serifas)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Seção 1 — Dados Pessoais -->
+            <section class="card" id="sec-pessoais">
+                <h2>Seção 1 — Dados Pessoais</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo *</label>
+                        <input type="text" id="nome" name="nome" required placeholder="Ex: João da Silva">
+                        <span class="error-msg">O nome é obrigatório.</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="foto">Foto de Perfil (Opcional)</label>
+                        <div class="foto-upload-container">
+                            <input type="file" id="foto" accept="image/png, image/jpeg" class="file-input">
+                            <div class="foto-preview" id="foto-preview">
+                                <span>Sem Foto</span>
+                            </div>
+                            <button type="button" class="btn-secundario btn-remover-foto" id="btn-remover-foto" style="display: none;">Remover Foto</button>
+                        </div>
+                        <span class="error-msg">Formato inválido. Apenas JPG/PNG.</span>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="email">E-mail *</label>
+                        <input type="email" id="email" name="email" required placeholder="Ex: joao@email.com">
+                        <span class="error-msg">Informe um e-mail válido.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefone">Telefone *</label>
+                        <input type="tel" id="telefone" name="telefone" required placeholder="Ex: (11) 99999-9999">
+                        <span class="error-msg">O telefone é obrigatório.</span>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="cidade_estado">Cidade / Estado *</label>
+                        <input type="text" id="cidade_estado" name="cidade_estado" required placeholder="Ex: São Paulo - SP">
+                        <span class="error-msg">A cidade e estado são obrigatórios.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn ou Portfólio</label>
+                        <input type="url" id="linkedin" name="linkedin" placeholder="Ex: https://linkedin.com/in/joao">
+                        <span class="error-msg">URL inválida.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção 2 — Objetivo Profissional -->
+            <section class="card" id="sec-objetivo">
+                <h2>Seção 2 — Objetivo Profissional</h2>
+                <div class="form-group">
+                    <label for="objetivo">Descreva seus objetivos (mínimo 20 caracteres) *</label>
+                    <textarea id="objetivo" name="objetivo" rows="4" required minlength="20" placeholder="Ex: Busco uma oportunidade na área de..."></textarea>
+                    <span class="error-msg">O objetivo deve ter no mínimo 20 caracteres.</span>
+                </div>
+            </section>
+
+            <!-- Seção 3 — Formação Acadêmica -->
+            <section class="card" id="sec-formacao">
+                <h2>Seção 3 — Formação Acadêmica</h2>
+                <div id="lista-formacoes">
+                    <!-- Itens adicionados dinamicamente via JS -->
+                </div>
+                <button type="button" class="btn-secundario" id="btn-add-formacao">+ Adicionar formação</button>
+            </section>
+
+            <!-- Seção 4 — Experiência Profissional -->
+            <section class="card" id="sec-experiencia">
+                <h2>Seção 4 — Experiência Profissional</h2>
+                <div id="lista-experiencias">
+                    <!-- Itens adicionados dinamicamente via JS -->
+                </div>
+                <button type="button" class="btn-secundario" id="btn-add-experiencia">+ Adicionar experiência</button>
+            </section>
+
+            <!-- Seção 5 — Habilidades -->
+            <section class="card" id="sec-habilidades">
+                <h2>Seção 5 — Habilidades</h2>
+                <div class="form-group">
+                    <label for="input-habilidade">Adicione habilidades (pressione Enter ou Vírgula) *</label>
+                    <div class="habilidades-container">
+                        <div id="chips-container"></div>
+                        <input type="text" id="input-habilidade" placeholder="Ex: JavaScript">
+                    </div>
+                    <span class="error-msg" id="habilidade-error" style="display: none;">Adicione pelo menos 1 habilidade.</span>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="button" class="btn-perigo" id="btn-limpar">Limpar Formulário</button>
+                <button type="submit" class="btn-primario" id="btn-gerar">
+                    <span class="btn-text">Gerar PDF</span>
+                    <span class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+            
+            <div id="global-error" class="global-error" style="display: none;"></div>
+        </form>
+    </main>
+
+    <!-- Dialog de Confirmação para Limpar -->
+    <dialog id="dialog-limpar">
+        <h3>Atenção</h3>
+        <p>Tem certeza de que deseja limpar todo o formulário? Isso apagará também o rascunho salvo.</p>
+        <div class="dialog-actions">
+            <button class="btn-secundario" id="btn-cancelar-limpar">Cancelar</button>
+            <button class="btn-perigo" id="btn-confirmar-limpar">Sim, Limpar</button>
+        </div>
+    </dialog>
+
+    <!-- Templates JS para adição dinâmica -->
+    <template id="tpl-formacao">
+        <div class="dynamic-item">
+            <button type="button" class="btn-remover" title="Remover" aria-label="Remover">×</button>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Curso *</label>
+                    <input type="text" name="formacao_curso" required>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+                <div class="form-group">
+                    <label>Instituição *</label>
+                    <input type="text" name="formacao_instituicao" required>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Ano de Início *</label>
+                    <input type="number" name="formacao_inicio" min="1900" max="2100" required>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+                <div class="form-group">
+                    <label>Ano de Término *</label>
+                    <select name="formacao_termino" required>
+                        <option value="">Selecione...</option>
+                        <option value="Em andamento">Em andamento</option>
+                        <!-- Options filled via JS -->
+                    </select>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-experiencia">
+        <div class="dynamic-item">
+            <button type="button" class="btn-remover" title="Remover" aria-label="Remover">×</button>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Empresa *</label>
+                    <input type="text" name="exp_empresa" required>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+                <div class="form-group">
+                    <label>Cargo *</label>
+                    <input type="text" name="exp_cargo" required>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+            </div>
+            <div class="grid-3-exp">
+                <div class="form-group">
+                    <label>Mês/Ano Início *</label>
+                    <input type="month" name="exp_inicio" required>
+                    <span class="error-msg">Campo obrigatório.</span>
+                </div>
+                <div class="form-group">
+                    <label>Mês/Ano Fim</label>
+                    <input type="month" name="exp_fim">
+                    <span class="error-msg">Campo obrigatório se não for atual.</span>
+                </div>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" name="exp_atual"> Emprego atual
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descrição das Atividades *</label>
+                <textarea name="exp_descricao" rows="3" required minlength="20"></textarea>
+                <span class="error-msg">A descrição deve ter no mínimo 20 caracteres.</span>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
